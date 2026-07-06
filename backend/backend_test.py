@@ -419,6 +419,92 @@ class APITester:
             self.test("Update ticket status", "PATCH", f"/admin/tickets/{ticket_id}", 200,
                 {"status": "resolved"}, token=self.admin_token)
 
+        # ============ NEW ITERATION 2 FEATURES ============
+        self.log("\n### ITERATION 2: BILLING, PRIVACY & SECURITY ###", Colors.YELLOW)
+        
+        # Billing endpoints
+        success, resp = self.test("Get billing plan (owner)", "GET", "/billing/plan", 200,
+            token=self.owner_token)
+        if success:
+            plan = resp.get("plan")
+            limits = resp.get("limits")
+            usage = resp.get("usage")
+            payments_enabled = resp.get("paymentsEnabled")
+            self.log(f"Plan: {plan}, Limits: {limits}, Usage: {usage}, Payments: {payments_enabled}", Colors.GREEN)
+            if plan != "free":
+                self.log(f"WARNING: Expected 'free' plan, got '{plan}'", Colors.YELLOW)
+            if payments_enabled != False:
+                self.log(f"WARNING: Expected paymentsEnabled=False, got {payments_enabled}", Colors.YELLOW)
+        
+        # Billing upgrade (intentional placeholder)
+        success, resp = self.test("Billing upgrade (placeholder)", "POST", "/billing/upgrade", 200,
+            token=self.owner_token)
+        if success:
+            status = resp.get("status")
+            if status != "pending_payment_integration":
+                self.log(f"WARNING: Expected status 'pending_payment_integration', got '{status}'", Colors.YELLOW)
+        
+        # Privacy export
+        success, resp = self.test("Privacy data export", "GET", "/privacy/export", 200,
+            token=self.owner_token, timeout=30)
+        if success:
+            exported_at = resp.get("exportedAt")
+            user_data = resp.get("user")
+            self.log(f"Export successful: {len(resp.keys())} collections exported", Colors.GREEN)
+        
+        # Privacy deletion request
+        success, resp = self.test("Privacy deletion request", "POST", "/privacy/delete-request", 200,
+            token=self.owner_token)
+        if success:
+            status = resp.get("status")
+            ticket_id = resp.get("ticketId")
+            self.log(f"Deletion request status: {status}, ticket: {ticket_id}", Colors.GREEN)
+        
+        # Second deletion request (should return already_pending)
+        success, resp = self.test("Privacy deletion request (duplicate)", "POST", "/privacy/delete-request", 200,
+            token=self.owner_token)
+        if success:
+            status = resp.get("status")
+            if status != "already_pending":
+                self.log(f"WARNING: Expected 'already_pending', got '{status}'", Colors.YELLOW)
+        
+        # Security: weak password registration
+        timestamp = int(time.time())
+        weak_email = f"weakpw{timestamp}@test.local"
+        self.test("Register with weak password (should fail)", "POST", "/auth/register", 422,
+            {"email": weak_email, "password": "onlyletters", "name": "Weak User"})
+        
+        # Security: strong password registration
+        strong_email = f"strongpw{timestamp}@test.local"
+        success, resp = self.test("Register with strong password", "POST", "/auth/register", 200,
+            {"email": strong_email, "password": "Strongpw1", "name": "Strong User"})
+        strong_user_token = resp.get("token") if success else None
+        
+        # Admin: change user plan to premium
+        if test_user_id:
+            success, resp = self.test("Admin change user plan to premium", "PATCH", 
+                f"/admin/users/{test_user_id}", 200,
+                {"plan": "premium"}, token=self.admin_token)
+            
+            # Verify plan change by getting billing info for that user
+            # (We can't directly test this without logging in as that user, but we can check admin users list)
+        
+        # Regression: bond score calculation still works
+        if self.seed_pet_id:
+            success, resp = self.test("REGRESSION: Bond score calculation", "POST", 
+                "/bond-scores/calculate", 200,
+                {"petId": self.seed_pet_id}, token=self.owner_token, timeout=30)
+        
+        # Regression: voice emergency escalation still works
+        success, resp = self.test("REGRESSION: Voice emergency escalation", "POST", 
+            "/voice/message", 200,
+            {"message": "my cat is choking", "mode": "text"},
+            token=self.owner_token, timeout=45)
+        if success:
+            escalation = resp.get("escalation")
+            if escalation:
+                self.log(f"Emergency escalation working: {escalation.get('category')}", Colors.GREEN)
+
         # ============ SUMMARY ============
         self.log("\n" + "="*80, Colors.YELLOW)
         self.log("TEST SUMMARY", Colors.YELLOW)

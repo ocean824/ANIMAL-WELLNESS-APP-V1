@@ -36,12 +36,15 @@ def _is_admin(user: Dict) -> bool:
 
 
 async def _validate_refs(body: Dict, user: Dict):
-    """Prevent wiring records to another user's data."""
+    """Prevent wiring records to another user's data (IDOR protection)."""
     if _is_admin(user):
         return
     for field, collection in REF_CHECKS.items():
         if field in body and body[field] and collection:
-            ref = await find_record(collection, body[field])
+            if collection == "__conversation__":
+                ref = await find_record("aiConversations", body[field]) or await find_record("voiceConversations", body[field])
+            else:
+                ref = await find_record(collection, body[field])
             if not ref:
                 raise HTTPException(status_code=400, detail=f"Referenced {field} does not exist.")
             owner = ref.get("userId") or ref.get("ownerUserId") or ref.get("createdByUserId")

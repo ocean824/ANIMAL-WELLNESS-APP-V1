@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from auth_utils import get_current_user, rate_limit
+from billing import check_quota
 from database import audit, create_record, find_record, list_records
 from models import SupportTicketInput, VoiceMessageInput
 from voice_service import handle_voice_message

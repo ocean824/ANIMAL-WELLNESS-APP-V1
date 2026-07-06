@@ -102,6 +102,12 @@ export default function Admin() {
                         <SelectContent>{["owner", "caregiver", "provider", "admin"].map((r) => <SelectItem key={r} value={r} className="capitalize">{r}</SelectItem>)}</SelectContent>
                       </Select>
                     </TableCell>
+                    <TableCell>
+                      <Select value={u.plan || "free"} onValueChange={(v) => changePlan(u, v)}>
+                        <SelectTrigger className="w-[110px] h-8" data-testid={`admin-plan-select-${u.id}`}><SelectValue /></SelectTrigger>
+                        <SelectContent>{["free", "premium"].map((p) => <SelectItem key={p} value={p} className="capitalize">{p}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </TableCell>
                     <TableCell><Badge variant="secondary" className={`border-0 ${u.isActive ? "bg-[hsl(var(--success)/0.12)] text-[hsl(var(--success))]" : "bg-[hsl(var(--destructive)/0.12)] text-[hsl(var(--destructive))]"}`}>{u.isActive ? "active" : "disabled"}</Badge></TableCell>
                     <TableCell className="text-right">
                       <Button size="sm" variant="secondary" className="rounded-lg" onClick={() => toggleActive(u)} data-testid={`admin-toggle-user-${u.id}`}>{u.isActive ? "Disable" : "Enable"}</Button>
@@ -197,15 +203,6 @@ export default function Admin() {
           <div className="space-y-3">
             <div className="space-y-1.5"><Label>Title *</Label><Input value={kbForm.title} onChange={(e) => setKbForm({ ...kbForm, title: e.target.value })} data-testid="kb-title-input" /></div>
             <div className="space-y-1.5"><Label>Category</Label><Input value={kbForm.category} onChange={(e) => setKbForm({ ...kbForm, category: e.target.value })} data-testid="kb-category-input" /></div>
-            <div className="space-y-1.5"><Label>Content *</Label><Textarea rows={5} value={kbForm.content} onChange={(e) => setKbForm({ ...kbForm, content: e.target.value })} data-testid="kb-content-input" /></div>
-          </div>
-          <DialogFooter><Button onClick={saveKb} className="rounded-xl" data-testid="kb-save-button">Save article</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-estid="kb-category-input" /></div>
             <div className="space-y-1.5"><Label>Content *</Label><Textarea rows={5} value={kbForm.content} onChange={(e) => setKbForm({ ...kbForm, content: e.target.value })} data-testid="kb-content-input" /></div>
           </div>
           <DialogFooter><Button onClick={saveKb} className="rounded-xl" data-testid="kb-save-button">Save article</Button></DialogFooter>

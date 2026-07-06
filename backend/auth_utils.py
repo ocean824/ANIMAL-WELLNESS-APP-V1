@@ -10,7 +10,9 @@ from fastapi import Depends, Header, HTTPException, Request
 
 from database import db
 
-JWT_SECRET = os.environ.get("JWT_SECRET", "soula-paws-dev-secret")
+JWT_SECRET = os.environ.get("JWT_SECRET", "")
+if len(JWT_SECRET) < 32:
+    raise RuntimeError("JWT_SECRET env var is required and must be at least 32 characters. Set it in backend/.env")
 JWT_ALG = "HS256"
 JWT_EXPIRES_SECONDS = 7 * 24 * 3600
 
@@ -67,7 +69,10 @@ def rate_limit(key: str, max_calls: int, window_seconds: int = 60):
 
 
 def client_ip(request: Request) -> str:
-    fwd = request.headers.get("x-forwarded-for")
-    if fwd:
-        return fwd.split(",")[0].strip()
+    # Behind a trusted reverse proxy/ingress (default here), X-Forwarded-For is set by the proxy.
+    # Set TRUST_PROXY=false if the backend is ever exposed directly to prevent header spoofing.
+    if os.environ.get("TRUST_PROXY", "true").lower() == "true":
+        fwd = request.headers.get("x-forwarded-for")
+        if fwd:
+            return fwd.split(",")[0].strip()
     return request.client.host if request.client else "unknown"

@@ -26,6 +26,17 @@ frontend/           React app (src/pages, src/components, src/lib)
 | `EMERGENT_LLM_KEY` | Emergent universal LLM key (or refactor `llm_service.py` to use `OPENAI_API_KEY`) |
 | `LLM_MODEL` | e.g. `gpt-4o-mini` |
 | `EXPOSE_RESET_TOKEN` | `true` in dev only: returns password-reset token in API response. **Set `false` in production** and wire an email provider (e.g. Resend) in `routers/auth_routes.py` → `forgot_password`. |
+| `TRUST_PROXY` | `true` (default) when behind a reverse proxy/ingress (X-Forwarded-For used for rate limiting). Set `false` if the backend is exposed directly. |
+
+## Security posture
+- JWT bearer auth (HS256, 7-day expiry). `JWT_SECRET` **must** be >= 32 chars — startup fails otherwise.
+- Passwords: bcrypt-hashed; policy requires min 8 chars with letters + a number.
+- Generic CRUD enforces ownership scoping, reference-ownership (IDOR) checks incl. conversations, protected-field stripping, and MongoDB `$`-operator/dotted-key sanitization.
+- Consent records upsert-by-type; report sharing is consent-gated; all sensitive actions audit-logged; soft deletes everywhere.
+- Rate limiting on auth/AI/export routes (in-memory; swap to Redis for multi-instance deployments).
+- Security headers on API responses (nosniff, frame deny, referrer policy). CORS origins env-driven; wildcard disables credentials and logs a warning.
+- Access token stored in `localStorage` (bearer header pattern). If you later serve frontend + backend from one origin, consider httpOnly cookies + CSRF protection.
+
 
 ### frontend/.env
 | Var | Purpose |

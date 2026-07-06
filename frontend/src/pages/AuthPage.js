@@ -124,7 +124,7 @@ export default function AuthPage({ mode }) {
                 {(mode === "login" || mode === "register" || mode === "reset") && (
                   <div className="space-y-1.5">
                     <Label htmlFor="password">{mode === "reset" ? "New password" : "Password"}</Label>
-                    <Input id="password" type="password" value={form.password} onChange={set("password")} required minLength={8} placeholder="••••••••" data-testid="auth-password-input" />
+                    <Input id="password" type="password" value={form.password} onChange={set("password")} required minLength={8} placeholder="Min 8 chars, letters + a number" data-testid="auth-password-input" />
                   </div>
                 )}
                 {mode === "reset" && (

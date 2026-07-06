@@ -17,6 +17,8 @@ const CONSENT_TYPES = [
 export default function Privacy() {
   const [records, setRecords] = useState([]);
   const [busyType, setBusyType] = useState(null);
+  const [exporting, setExporting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const load = async () => {
     try { const { data } = await api.get("/consent-records?limit=100"); setRecords(data); } catch (e) { toast.error(errMsg(e)); }

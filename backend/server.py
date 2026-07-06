@@ -43,12 +43,16 @@ async def health():
     return {"status": "ok", "service": "soula-paws", "time": now_iso()}
 
 
-# Request ID middleware (observability improvement carried over from source middleware stack)
+# Request ID + security headers middleware (observability + hardening)
 @app.middleware("http")
 async def request_id_middleware(request: Request, call_next):
     request.state.request_id = request.headers.get("x-request-id", str(uuid.uuid4()))
     response = await call_next(request)
     response.headers["x-request-id"] = request.state.request_id
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), geolocation=()"
     return response
 
 
@@ -63,10 +67,15 @@ api_router.include_router(crud_routes.router)
 
 app.include_router(api_router)
 
+# CORS: origins from env. With wildcard origins, credentials must be disabled per spec
+# (we use Authorization bearer headers, not cookies, so credentials aren't required).
+_cors_origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "*").split(",") if o.strip()]
+if "*" in _cors_origins:
+    logger.warning("CORS_ORIGINS is '*' - set explicit origins in production.")
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","),
+    allow_credentials="*" not in _cors_origins,
+    allow_origins=_cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )

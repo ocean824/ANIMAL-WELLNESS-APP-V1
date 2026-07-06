@@ -1,8 +1,15 @@
 """Pydantic models & resource registry for Soula Paws."""
+import re
 from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 EMAIL_PATTERN = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+
+
+def _validate_password_strength(v: str) -> str:
+    if not re.search(r"[A-Za-z]", v) or not re.search(r"[0-9]", v):
+        raise ValueError("Password must contain at least one letter and one number.")
+    return v
 
 
 # ---------- Auth ----------
@@ -10,6 +17,11 @@ class RegisterInput(BaseModel):
     email: str = Field(pattern=EMAIL_PATTERN)
     password: str = Field(min_length=8)
     name: str = Field(min_length=1, max_length=120)
+
+    @field_validator("password")
+    @classmethod
+    def password_strength(cls, v):
+        return _validate_password_strength(v)
 
 
 class LoginInput(BaseModel):
@@ -25,10 +37,20 @@ class ResetPasswordInput(BaseModel):
     token: str
     password: str = Field(min_length=8)
 
+    @field_validator("password")
+    @classmethod
+    def password_strength(cls, v):
+        return _validate_password_strength(v)
+
 
 class ChangePasswordInput(BaseModel):
     currentPassword: str
     newPassword: str = Field(min_length=8)
+
+    @field_validator("newPassword")
+    @classmethod
+    def password_strength(cls, v):
+        return _validate_password_strength(v)
 
 
 # ---------- Workflows ----------
@@ -98,6 +120,11 @@ class AdminUserCreate(BaseModel):
     name: str
     role: str = Field(default="owner", pattern="^(owner|caregiver|provider|admin)$")
 
+    @field_validator("password")
+    @classmethod
+    def password_strength(cls, v):
+        return _validate_password_strength(v)
+
 
 # ---------- Generic CRUD resource registry ----------
 # owner_field: which field scopes visibility to the authenticated user
@@ -137,7 +164,7 @@ REF_CHECKS = {
     "petId": "petProfiles",
     "podId": "relationshipPods",
     "ritualId": "rituals",
-    "conversationId": None,  # checked contextually (aiConversations or voiceConversations)
+    "conversationId": "__conversation__",  # special-cased: aiConversations OR voiceConversations
     "humanProfileId": "humanProfiles",
 }
 

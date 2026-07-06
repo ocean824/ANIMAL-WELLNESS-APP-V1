@@ -20,6 +20,7 @@ import CareCircle from "@/pages/CareCircle";
 import VoiceSupport from "@/pages/VoiceSupport";
 import AgentCenter from "@/pages/AgentCenter";
 import Privacy from "@/pages/Privacy";
+import Billing from "@/pages/Billing";
 import Admin from "@/pages/Admin";
 
 const Private = ({ children, adminOnly = false }) => {
@@ -69,11 +70,6 @@ function App() {
         <Toaster position="top-right" richColors />
       </BrowserRouter>
     </AuthProvider>
-  );
-}
-
-export default App;
-hProvider>
   );
 }
 

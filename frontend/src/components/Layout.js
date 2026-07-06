@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
-  Bell, Bot, Brain, CalendarCheck, FileText, Gauge, HandHeart, Heart, HeartHandshake,
+  ArrowLeft, Bell, Bot, Brain, CalendarCheck, CreditCard, FileText, Gauge, HandHeart, Heart, HeartHandshake,
   LayoutDashboard, LogOut, Menu, Mic, PawPrint, Settings, Shield, ShieldCheck, Sparkles, User, Users,
 } from "lucide-react";
 
@@ -157,7 +157,7 @@ const ChangePasswordDialog = ({ open, onOpenChange }) => {
         <DialogHeader><DialogTitle>Change password</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <Input type="password" placeholder="Current password" value={current} onChange={(e) => setCurrent(e.target.value)} data-testid="change-password-current-input" />
-          <Input type="password" placeholder="New password (min 8 characters)" value={next} onChange={(e) => setNext(e.target.value)} data-testid="change-password-new-input" />
+          <Input type="password" placeholder="New password (min 8 chars, letters + a number)" value={next} onChange={(e) => setNext(e.target.value)} data-testid="change-password-new-input" />
         </div>
         <DialogFooter>
           <Button onClick={submit} disabled={busy || next.length < 8} data-testid="change-password-submit-button">{busy ? "Saving..." : "Change password"}</Button>
