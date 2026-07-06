@@ -17,10 +17,10 @@
   },
   {
     "content": "Code review (troubleshoot agent) + fix all vulnerabilities found",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Test new features (testing agent)",
-    "status": "pending"
+    "status": "completed"
   }
 ]
