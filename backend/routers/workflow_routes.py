@@ -162,7 +162,7 @@ async def share_report(report_id: str, body: ShareReportInput, user=Depends(get_
     report = await find_record("reports", report_id)
     if not report or report.get("userId") != user["id"]:
         raise HTTPException(status_code=404, detail="Report not found.")
-    consents = await list_records("consentRecords", {"userId": user["id"], "consentType": "report_sharing"}, limit=1)
+    consents = await list_records("consentRecords", {"userId": user["id"], "consentType": "report_sharing"}, limit=50, sort_field="updatedAt")
     if not consents or not consents[0].get("granted"):
         raise HTTPException(status_code=403, detail="Report sharing requires consent. Enable 'Report sharing' in Privacy & Consent first.")
     updated = await update_record("reports", report_id, {"status": "shared", "sharedWith": body.sharedWith, "sharedAt": now_iso()})

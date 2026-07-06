@@ -82,6 +82,16 @@ async def create_resource(resource: str, body: Dict[str, Any], user=Depends(get_
     await _validate_refs(clean, user)
     if cfg.get("owner"):
         clean[cfg["owner"]] = user["id"]
+    # Consent records are upserted by type: exactly one active record per consentType per user,
+    # so granting/revoking/deleting is always deterministic (privacy requirement).
+    if resource == "consent-records":
+        existing = await list_records("consentRecords", {"userId": user["id"], "consentType": clean.get("consentType")}, limit=50)
+        if existing:
+            updated = await update_record("consentRecords", existing[0]["id"], clean)
+            for dup in existing[1:]:
+                await soft_delete_record("consentRecords", dup["id"], user["id"])
+            await audit("consentRecords.update", "consentRecords", existing[0]["id"], user["id"])
+            return updated
     record = await create_record(cfg["collection"], clean)
     await audit(f"{cfg['collection']}.create", cfg["collection"], record["id"], user["id"])
     return record
