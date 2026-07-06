@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from auth_utils import get_current_user, rate_limit, require_admin
+from billing import check_quota
 from database import audit, find_record, list_records, update_record
 from domain_services import run_agent
 from models import AgentRunInput, ApprovalDecisionInput
@@ -44,6 +45,7 @@ async def agent_audit_logs(user=Depends(require_admin)):
 @router.post("/run")
 async def run(body: AgentRunInput, user=Depends(get_current_user)):
     rate_limit(f"agents:{user['id']}", 15)
+    await check_quota(user, "agent_runs")
     result = await run_agent(user["id"], body.agentKey, body.title, body.prompt)
     if result.get("error"):
         raise HTTPException(status_code=404, detail="Agent is not enabled or does not exist.")

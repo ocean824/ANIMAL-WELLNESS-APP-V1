@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from auth_utils import get_current_user
+from billing import check_quota
 from database import (audit, create_record, find_record, list_records,
                       soft_delete_record, update_record)
 from models import PROTECTED_FIELDS, REF_CHECKS, RESOURCES
@@ -12,6 +13,15 @@ from models import PROTECTED_FIELDS, REF_CHECKS, RESOURCES
 router = APIRouter(tags=["crud"])
 
 FILTER_PARAMS = ["petId", "podId", "conversationId", "ritualId", "taskId", "status", "date", "runId", "category", "consentType"]
+
+
+def _sanitize(value):
+    """Strip MongoDB operator keys ($...) and dotted keys to prevent operator injection."""
+    if isinstance(value, dict):
+        return {k: _sanitize(v) for k, v in value.items() if isinstance(k, str) and not k.startswith("$") and "." not in k}
+    if isinstance(value, list):
+        return [_sanitize(v) for v in value]
+    return value
 
 
 def _cfg(resource: str) -> Dict[str, Any]:
@@ -78,7 +88,9 @@ async def create_resource(resource: str, body: Dict[str, Any], user=Depends(get_
     missing = [f for f in cfg.get("required", []) if body.get(f) in (None, "", [])]
     if missing:
         raise HTTPException(status_code=422, detail=f"Missing required field(s): {', '.join(missing)}.")
-    clean = {k: v for k, v in body.items() if k not in PROTECTED_FIELDS}
+    if resource == "pet-profiles":
+        await check_quota(user, "pets")
+    clean = _sanitize({k: v for k, v in body.items() if k not in PROTECTED_FIELDS})
     await _validate_refs(clean, user)
     if cfg.get("owner"):
         clean[cfg["owner"]] = user["id"]
@@ -108,7 +120,7 @@ async def update_resource(resource: str, record_id: str, body: Dict[str, Any], u
     owner_field = cfg.get("owner")
     if owner_field and not _is_admin(user) and record.get(owner_field) != user["id"]:
         raise HTTPException(status_code=403, detail="You do not have access to this record.")
-    clean = {k: v for k, v in body.items() if k not in PROTECTED_FIELDS}
+    clean = _sanitize({k: v for k, v in body.items() if k not in PROTECTED_FIELDS})
     if not clean:
         raise HTTPException(status_code=422, detail="No updatable fields provided.")
     await _validate_refs(clean, user)

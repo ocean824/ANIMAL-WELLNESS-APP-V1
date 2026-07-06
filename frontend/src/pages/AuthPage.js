@@ -11,10 +11,10 @@ import { PawPrint, Shield, Gauge, HeartHandshake } from "lucide-react";
 
 const BrandPanel = () => (
   <div className="hidden lg:flex flex-col justify-between noise-overlay bg-[linear-gradient(135deg,hsl(34_33%_97%)_0%,hsl(32_28%_92%)_55%,hsl(34_33%_97%)_100%)] p-10 border-r border-border">
-    <div className="flex items-center gap-2">
+    <Link to="/" className="flex items-center gap-2 w-fit" data-testid="auth-logo-link">
       <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center"><PawPrint className="w-4 h-4 text-primary-foreground" /></div>
       <span className="font-display text-xl font-semibold">Soula Paws</span>
-    </div>
+    </Link>
     <div className="space-y-6 max-w-md">
       <h2 className="font-display text-3xl font-semibold leading-snug">The relationship intelligence layer between you and your animal.</h2>
       <div className="space-y-3">
@@ -84,9 +84,14 @@ export default function AuthPage({ mode }) {
       <div className="flex items-center justify-center p-6">
         <Card className="w-full max-w-md rounded-2xl shadow-[0_18px_50px_-30px_rgba(0,0,0,0.35)]">
           <CardContent className="p-8">
+            <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-4" data-testid="auth-back-home-link">
+              ← Back to home
+            </Link>
             <div className="flex items-center gap-2 mb-6 lg:hidden">
-              <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center"><PawPrint className="w-4 h-4 text-primary-foreground" /></div>
-              <span className="font-display text-lg font-semibold">Soula Paws</span>
+              <Link to="/" className="flex items-center gap-2" data-testid="auth-mobile-logo-link">
+                <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center"><PawPrint className="w-4 h-4 text-primary-foreground" /></div>
+                <span className="font-display text-lg font-semibold">Soula Paws</span>
+              </Link>
             </div>
             <h1 className="text-xl font-semibold">{titles[mode][0]}</h1>
             <p className="text-sm text-muted-foreground mt-1 mb-6">{titles[mode][1]}</p>

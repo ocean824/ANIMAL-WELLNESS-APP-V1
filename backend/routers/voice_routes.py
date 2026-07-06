@@ -12,6 +12,7 @@ router = APIRouter(prefix="/voice", tags=["voice"])
 @router.post("/message")
 async def voice_message(body: VoiceMessageInput, user=Depends(get_current_user)):
     rate_limit(f"voice:{user['id']}", 30)
+    await check_quota(user, "ai")
     return await handle_voice_message(user["id"], user["name"], body.message, body.conversationId, body.viaVoice)
 
 

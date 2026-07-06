@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from auth_utils import get_current_user, rate_limit
+from billing import check_quota
 from database import audit, create_record, find_record, list_records, now_iso, update_record
 from domain_services import calculate_bond_score, generate_relationship_insight, generate_report
 from llm_service import classify_safety, llm_json, stream_coach
@@ -40,6 +41,7 @@ async def relationship_insight(body: InsightInput, user=Depends(get_current_user
 @router.post("/ai/generate-ritual")
 async def generate_ritual(body: GenerateRitualInput, user=Depends(get_current_user)):
     rate_limit(f"ai:{user['id']}", 20)
+    await check_quota(user, "ai")
     pet = await _own_pet(body.petId, user)
     goal = body.goal or "strengthen the bond gently"
     system = (
@@ -75,6 +77,7 @@ async def generate_ritual(body: GenerateRitualInput, user=Depends(get_current_us
 async def ai_chat(body: ChatInput, request: Request, user=Depends(get_current_user)):
     """SSE streaming chat with the AI Bond Coach. Persists conversation + messages with safety levels."""
     rate_limit(f"ai:{user['id']}", 30)
+    await check_quota(user, "ai")
     pet = None
     if body.petId:
         pet = await _own_pet(body.petId, user)
@@ -153,6 +156,7 @@ async def ai_chat(body: ChatInput, request: Request, user=Depends(get_current_us
 @router.post("/reports/generate")
 async def reports_generate(body: GenerateReportInput, user=Depends(get_current_user)):
     rate_limit(f"reports:{user['id']}", 10)
+    await check_quota(user, "reports")
     await _own_pet(body.petId, user)
     return await generate_report(user["id"], body.petId, body.type)
 

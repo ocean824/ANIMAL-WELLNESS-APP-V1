@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,17 +30,26 @@ const SAFETY = [
 ];
 
 export default function Landing() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const logoTarget = user ? (user.role === "admin" ? "/admin" : "/dashboard") : "/";
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 bg-[hsl(var(--background)/0.92)] backdrop-blur border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <button className="flex items-center gap-2" onClick={() => navigate(logoTarget)} data-testid="landing-logo-button">
             <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center"><PawPrint className="w-4 h-4 text-primary-foreground" /></div>
             <span className="font-display text-lg font-semibold">Soula Paws</span>
-          </div>
+          </button>
           <div className="flex items-center gap-2">
-            <Link to="/login"><Button variant="ghost" data-testid="landing-login-button">Log in</Button></Link>
-            <Link to="/register"><Button className="rounded-xl" data-testid="landing-register-button">Start gently</Button></Link>
+            {user ? (
+              <Button className="rounded-xl" onClick={() => navigate(logoTarget)} data-testid="landing-open-app-button">Open my dashboard</Button>
+            ) : (
+              <>
+                <Link to="/login"><Button variant="ghost" data-testid="landing-login-button">Log in</Button></Link>
+                <Link to="/register"><Button className="rounded-xl" data-testid="landing-register-button">Start gently</Button></Link>
+              </>
+            )}
           </div>
         </div>
       </header>

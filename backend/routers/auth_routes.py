@@ -1,5 +1,6 @@
 """Auth routes: register, login, logout, me, forgot/reset/change password."""
 import hashlib
+import os
 import secrets
 from datetime import datetime, timedelta, timezone
 
@@ -79,11 +80,13 @@ async def forgot_password(body: ForgotPasswordInput, request: Request):
             "usedAt": None,
         })
         await audit("auth.forgot_password", "users", user["id"], user["id"])
-        # Dev mode: no email service configured -> return reset token directly (docs: 'send email or log link in dev mode')
-        dev_token = raw_token
+        # Dev mode only: no email service configured -> return reset token in response.
+        # Set EXPOSE_RESET_TOKEN=false in production and deliver the link via email (e.g. Resend).
+        if os.environ.get("EXPOSE_RESET_TOKEN", "true").lower() == "true":
+            dev_token = raw_token
     return {
         "message": "If an account exists for that email, a reset link has been sent.",
-        "devMode": True,
+        "devMode": os.environ.get("EXPOSE_RESET_TOKEN", "true").lower() == "true",
         "devResetToken": dev_token,
     }
 

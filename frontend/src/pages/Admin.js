@@ -50,6 +50,9 @@ export default function Admin() {
   const changeRole = async (u, role) => {
     try { await api.patch(`/admin/users/${u.id}`, { role }); toast.success("Role updated."); load(); } catch (e) { toast.error(errMsg(e)); }
   };
+  const changePlan = async (u, plan) => {
+    try { await api.patch(`/admin/users/${u.id}`, { plan }); toast.success(`Plan set to ${plan}.`); load(); } catch (e) { toast.error(errMsg(e)); }
+  };
   const updateTicket = async (t, status) => {
     try { await api.patch(`/admin/tickets/${t.id}`, { status }); toast.success("Ticket updated."); load(); } catch (e) { toast.error(errMsg(e)); }
   };
@@ -87,7 +90,7 @@ export default function Admin() {
         <TabsContent value="users">
           <Card className="rounded-2xl"><CardContent className="p-0 overflow-x-auto">
             <Table>
-              <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Email</TableHead><TableHead>Role</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Email</TableHead><TableHead>Role</TableHead><TableHead>Plan</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
               <TableBody>
                 {users.map((u) => (
                   <TableRow key={u.id} data-testid={`admin-user-row-${u.id}`}>
@@ -194,6 +197,15 @@ export default function Admin() {
           <div className="space-y-3">
             <div className="space-y-1.5"><Label>Title *</Label><Input value={kbForm.title} onChange={(e) => setKbForm({ ...kbForm, title: e.target.value })} data-testid="kb-title-input" /></div>
             <div className="space-y-1.5"><Label>Category</Label><Input value={kbForm.category} onChange={(e) => setKbForm({ ...kbForm, category: e.target.value })} data-testid="kb-category-input" /></div>
+            <div className="space-y-1.5"><Label>Content *</Label><Textarea rows={5} value={kbForm.content} onChange={(e) => setKbForm({ ...kbForm, content: e.target.value })} data-testid="kb-content-input" /></div>
+          </div>
+          <DialogFooter><Button onClick={saveKb} className="rounded-xl" data-testid="kb-save-button">Save article</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+estid="kb-category-input" /></div>
             <div className="space-y-1.5"><Label>Content *</Label><Textarea rows={5} value={kbForm.content} onChange={(e) => setKbForm({ ...kbForm, content: e.target.value })} data-testid="kb-content-input" /></div>
           </div>
           <DialogFooter><Button onClick={saveKb} className="rounded-xl" data-testid="kb-save-button">Save article</Button></DialogFooter>

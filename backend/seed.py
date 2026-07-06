@@ -57,9 +57,9 @@ async def seed_database():
             base.update(doc)
             await db[collection].insert_one(base)
 
-    await upsert("users", SEED_ADMIN_ID, {"email": "admin@soulapaws.local", "passwordHash": hash_password("Admin123!"), "name": "Soula Paws Admin", "role": "admin", "isActive": True, "lastLoginAt": None})
-    await upsert("users", SEED_OWNER_ID, {"email": "owner@soulapaws.local", "passwordHash": hash_password("Owner123!"), "name": "Demo Pet Parent", "role": "owner", "isActive": True, "lastLoginAt": None})
-    await upsert("users", SEED_CAREGIVER_ID, {"email": "caregiver@soulapaws.local", "passwordHash": hash_password("Caregiver123!"), "name": "Demo Caregiver", "role": "caregiver", "isActive": True, "lastLoginAt": None})
+    await upsert("users", SEED_ADMIN_ID, {"email": "admin@soulapaws.local", "passwordHash": hash_password("Admin123!"), "name": "Soula Paws Admin", "role": "admin", "plan": "premium", "isActive": True, "lastLoginAt": None})
+    await upsert("users", SEED_OWNER_ID, {"email": "owner@soulapaws.local", "passwordHash": hash_password("Owner123!"), "name": "Demo Pet Parent", "role": "owner", "plan": "free", "isActive": True, "lastLoginAt": None})
+    await upsert("users", SEED_CAREGIVER_ID, {"email": "caregiver@soulapaws.local", "passwordHash": hash_password("Caregiver123!"), "name": "Demo Caregiver", "role": "caregiver", "plan": "free", "isActive": True, "lastLoginAt": None})
 
     await upsert("humanProfiles", SEED_HUMAN_ID, {"userId": SEED_OWNER_ID, "displayName": "Demo Pet Parent", "emotionalGoals": ["reduce anxiety together", "build a calm daily ritual", "track senior-pet comfort"], "stressLevel": 4, "currentMood": "hopeful", "preferredRoutines": ["morning walk", "evening decompression", "quiet gratitude log"], "notes": "Seed profile used to demonstrate the dual human + animal emotional tracking model."})
 

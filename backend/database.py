@@ -101,6 +101,7 @@ def sanitize_user(user: Dict[str, Any]) -> Dict[str, Any]:
         "email": user["email"],
         "name": user["name"],
         "role": user["role"],
+        "plan": user.get("plan", "free"),
         "isActive": user.get("isActive", True),
         "lastLoginAt": user.get("lastLoginAt"),
         "createdAt": user.get("createdAt"),

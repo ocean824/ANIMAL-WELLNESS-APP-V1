@@ -39,6 +39,7 @@ const NAV = [
   { section: "Support", items: [
     { to: "/voice-support", label: "Voice Support", icon: Mic },
     { to: "/agents", label: "Agent Center", icon: Bot },
+    { to: "/billing", label: "Plan & Billing", icon: CreditCard },
     { to: "/privacy", label: "Privacy & Consent", icon: Shield },
   ]},
 ];
@@ -46,9 +47,10 @@ const NAV = [
 const SidebarNav = ({ onNavigate }) => {
   const location = useLocation();
   const { user } = useAuth();
+  const logoTarget = user ? (user.role === "admin" ? "/admin" : "/dashboard") : "/";
   return (
     <div className="flex flex-col h-full">
-      <Link to="/dashboard" className="flex items-center gap-2 px-5 py-5" data-testid="sidebar-logo-link" onClick={onNavigate}>
+      <Link to={logoTarget} className="flex items-center gap-2 px-5 py-5" data-testid="sidebar-logo-link" onClick={onNavigate}>
         <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
           <PawPrint className="w-4 h-4 text-primary-foreground" />
         </div>
@@ -170,6 +172,8 @@ export const Layout = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [pwOpen, setPwOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === "/dashboard" || location.pathname === "/admin";
 
   return (
     <div className="min-h-screen bg-background">
@@ -188,6 +192,11 @@ export const Layout = ({ children }) => {
                   <SidebarNav onNavigate={() => setMobileOpen(false)} />
                 </SheetContent>
               </Sheet>
+              {!isHome && (
+                <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground" onClick={() => navigate(-1)} data-testid="back-button">
+                  <ArrowLeft className="w-4 h-4" /> Back
+                </Button>
+              )}
               <Badge variant="secondary" className="hidden sm:inline-flex border-0 bg-[hsl(var(--accent)/0.4)] text-accent-foreground font-normal">
                 Privacy-first · Observation-based · Never a diagnosis
               </Badge>

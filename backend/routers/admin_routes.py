@@ -44,6 +44,8 @@ async def update_user(user_id: str, body: dict, admin=Depends(require_admin)):
         patch["role"] = body["role"]
     if "isActive" in body:
         patch["isActive"] = bool(body["isActive"])
+    if "plan" in body and body["plan"] in ("free", "premium"):
+        patch["plan"] = body["plan"]
     if body.get("password"):
         if len(body["password"]) < 8:
             raise HTTPException(status_code=422, detail="Password must be at least 8 characters.")

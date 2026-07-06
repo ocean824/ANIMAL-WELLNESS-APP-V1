@@ -62,12 +62,18 @@ function App() {
           <Route path="/voice-support" element={<Private><VoiceSupport /></Private>} />
           <Route path="/agents" element={<Private><AgentCenter /></Private>} />
           <Route path="/privacy" element={<Private><Privacy /></Private>} />
+          <Route path="/billing" element={<Private><Billing /></Private>} />
           <Route path="/admin" element={<Private adminOnly><Admin /></Private>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Toaster position="top-right" richColors />
       </BrowserRouter>
     </AuthProvider>
+  );
+}
+
+export default App;
+hProvider>
   );
 }
 

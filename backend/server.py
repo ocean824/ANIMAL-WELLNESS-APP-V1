@@ -17,7 +17,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from database import client, ensure_indexes, now_iso
 from seed import seed_database
-from routers import (admin_routes, agent_routes, auth_routes, crud_routes,
+from routers import (account_routes, admin_routes, agent_routes, auth_routes, crud_routes,
                      voice_routes, workflow_routes)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -58,6 +58,7 @@ api_router.include_router(workflow_routes.router)
 api_router.include_router(agent_routes.router)
 api_router.include_router(voice_routes.router)
 api_router.include_router(admin_routes.router)
+api_router.include_router(account_routes.router)
 api_router.include_router(crud_routes.router)
 
 app.include_router(api_router)

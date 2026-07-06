@@ -1,34 +1,26 @@
 [
   {
-    "content": "Phase 1: Get Emergent LLM integration playbook",
+    "content": "Back buttons on all pages + smart logo redirect (home vs dashboard)",
     "status": "completed"
   },
   {
-    "content": "Phase 1: POC test_core.py (Mongo + LLM chat + safety classification + ritual JSON)",
+    "content": "Phase 7+: plan tiers (free/premium), usage quotas, billing page (Stripe placeholder, no wiring)",
     "status": "completed"
   },
   {
-    "content": "Phase 2: Get design guidelines from design_agent",
+    "content": "Phase 7+: privacy data export (JSON download) + account deletion request",
     "status": "completed"
   },
   {
-    "content": "Phase 2: Backend full implementation (auth, CRUD, bond, intelligence, AI, reports, agents, voice, admin, seed)",
+    "content": "Security hardening ($-key sanitization, gated dev reset token) + README for Replit export",
     "status": "completed"
   },
   {
-    "content": "Phase 2: Frontend full implementation (all pages, warm calming design)",
-    "status": "completed"
+    "content": "Code review (troubleshoot agent) + fix all vulnerabilities found",
+    "status": "in_progress"
   },
   {
-    "content": "Phase 2: All user stories covered in development",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 2: End to End testing using Testing Agent",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 3: Fix all bugs found in testing (consent enforcement - fixed & verified)",
-    "status": "completed"
+    "content": "Test new features (testing agent)",
+    "status": "pending"
   }
 ]

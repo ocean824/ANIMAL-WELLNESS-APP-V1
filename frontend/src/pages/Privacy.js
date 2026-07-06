@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { api, errMsg } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared";
-import { Shield } from "lucide-react";
+import { Download, Shield, Trash2 } from "lucide-react";
 
 const CONSENT_TYPES = [
   { type: "ai_wellness_assistance", label: "AI wellness assistance", desc: "Allow the AI Bond Coach and intelligence engine to analyze your logs and generate insights. The AI never diagnoses or replaces a veterinarian." },
@@ -35,6 +36,30 @@ export default function Privacy() {
     } catch (e) { toast.error(errMsg(e)); } finally { setBusyType(null); }
   };
 
+  const exportData = async () => {
+    setExporting(true);
+    try {
+      const { data } = await api.get("/privacy/export");
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `soula-paws-export-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Your data export downloaded. The export was recorded in your audit log.");
+    } catch (e) { toast.error(errMsg(e)); } finally { setExporting(false); }
+  };
+
+  const requestDeletion = async () => {
+    if (!window.confirm("Request account deletion? A privacy team member will verify your identity before anything is removed.")) return;
+    setDeleting(true);
+    try {
+      const { data } = await api.post("/privacy/delete-request");
+      toast.success(data.message);
+    } catch (e) { toast.error(errMsg(e)); } finally { setDeleting(false); }
+  };
+
   return (
     <div className="max-w-2xl">
       <PageHeader title="Privacy & Consent" subtitle="You control what's shared. Every change here is recorded with a timestamp." />
@@ -57,8 +82,25 @@ export default function Privacy() {
         })}
         <Card className="rounded-2xl">
           <CardHeader className="pb-2"><CardTitle className="text-sm font-semibold flex items-center gap-2"><Shield className="w-4 h-4 text-primary" /> Data requests</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Data export and account deletion go through a verified human review workflow to protect you. Ask the Voice Support agent to "delete my data" or "export my data" and a privacy ticket will be created for our team.</p>
+          <CardContent className="space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium">Export my data</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Download a complete JSON copy of everything in your account — profiles, logs, scores, conversations, reports, and consent history.</p>
+              </div>
+              <Button variant="secondary" className="rounded-xl shrink-0" onClick={exportData} disabled={exporting} data-testid="privacy-export-button">
+                <Download className="w-4 h-4 mr-1.5" /> {exporting ? "Preparing..." : "Export JSON"}
+              </Button>
+            </div>
+            <div className="flex items-start justify-between gap-4 border-t border-border pt-4">
+              <div>
+                <p className="text-sm font-medium">Request account deletion</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Deletion goes through a verified human review workflow to protect you. A high-priority privacy ticket is created and our team will contact you before anything is removed.</p>
+              </div>
+              <Button variant="ghost" className="rounded-xl shrink-0 text-destructive hover:text-destructive" onClick={requestDeletion} disabled={deleting} data-testid="privacy-delete-request-button">
+                <Trash2 className="w-4 h-4 mr-1.5" /> {deleting ? "Sending..." : "Request deletion"}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
